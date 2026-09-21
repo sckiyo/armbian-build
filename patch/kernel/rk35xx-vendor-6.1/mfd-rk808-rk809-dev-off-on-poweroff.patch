@@ -1,0 +1,72 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: sckiyo <sckiyo@outlook.com>
+Date: Wed, 16 Sep 2026 23:10:00 +0800
+Subject: [PATCH] mfd: rk808: write DEV_OFF for RK809/RK817 on poweroff
+
+Vendor rk808 only configures SLPPIN_DN_FUN for RK809/RK817 and never
+registers the syscore shutdown that writes DEV_OFF. That leaves
+always-on rails powered after "reboot: Power down": poweroff draws
+~1.5 W on Orange Pi 3B (RK809) and ~1.0 W on Radxa ZERO 3E (RK817);
+with this patch they read 0 W and ~0.1 W respectively.
+
+Mirror mainline: handle RK809/RK817 in rk8xx_device_shutdown() and
+attach device_shutdown_fn so syscore actually runs it.
+
+rk8xx_syscore_shutdown() opens with RTC-quieting writes addressed via
+the RK808 register map; on RK809/RK817 those offsets (0x4d, 0x12) are
+codec registers (DI2S_TXCR1, DTOP_VUCTL). Skip them for these chips:
+their RTC interrupts are already masked by rk817_shutdown_prepare()
+at POWER_OFF_PREPARE with the correct registers, and poweroff is
+unchanged otherwise.
+
+Family-wide by design: this patch dir serves every rk35xx vendor board
+(rock-3a, armsom-sige3, orangepi-3b, radxa-zero3, ...), so all boards
+with an RK809/RK817 PMIC gain DEV_OFF at poweroff. Mainline kernels
+already behave this way for these boards, so no per-board opt-out is
+provided.
+
+Signed-off-by: sckiyo <sckiyo@outlook.com>
+---
+ drivers/mfd/rk808.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+
+diff --git a/drivers/mfd/rk808.c b/drivers/mfd/rk808.c
+index 111111111111..222222222222 100644
+--- a/drivers/mfd/rk808.c
++++ b/drivers/mfd/rk808.c
+@@ -1001,6 +1001,14 @@ static void rk8xx_device_shutdown(void)
+ 		reg = RK818_DEVCTRL_REG;
+ 		bit = DEV_OFF;
+ 		break;
++	case RK809_ID:
++	case RK817_ID:
++		/* Match mainline: DEV_OFF on SYS_CFG3. SLPPIN_DN_FUN alone
++		 * leaves always-on rails powered (~1 W+ measured).
++		 */
++		reg = RK817_SYS_CFG(3);
++		bit = DEV_OFF;
++		break;
+ 	default:
+ 		return;
+ 	}
+@@ -1027,3 +1035,9 @@
+-	if (rk808->variant != RK801_ID) {
++	/* On RK809/RK817, 0x4d and 0x12 below are codec registers
++	 * (DI2S_TXCR1, DTOP_VUCTL); rk817_shutdown_prepare() already
++	 * masks their RTC interrupts. Skip the writes.
++	 */
++	if (rk808->variant != RK801_ID &&
++	    rk808->variant != RK809_ID &&
++	    rk808->variant != RK817_ID) {
+ 		/* close rtc int when power off */
+ 		regmap_update_bits(rk808->regmap,
+@@ -1447,6 +1461,7 @@ static int rk808_probe(struct i2c_client *client,
+ 		on_source = RK817_ON_SOURCE_REG;
+ 		off_source = RK817_OFF_SOURCE_REG;
+ 		of_property_prepare_fn = rk817_of_property_prepare;
++		device_shutdown_fn = rk8xx_device_shutdown;
+ 		break;
+ 	default:
+ 		dev_err(&client->dev, "Unsupported RK8XX ID %lu\n",
+--
+2.39.5
