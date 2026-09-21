@@ -1,13 +1,13 @@
 From 40f17829a096ffd2d8f3a7919f0564d471dc9f1d Mon Sep 17 00:00:00 2001
 From: chainsx <chainsx@outlook.com>
 Date: Sun, 22 Dec 2024 16:27:57 +0800
-Subject: [PATCH] add support for dshanpi-r1
+Subject: [PATCH] board: rockchip: add 100ASK DshanPi R1 / R1+ support
 
 ---
- arch/arm/dts/rk3568-dshanpi-r1-u-boot.dtsi    |  42 ++
- configs/dshanpi-r1-rk3568_defconfig           |  93 +++
- .../src/arm64/rockchip/rk3568-dshanpi-r1.dts  | 689 ++++++++++++++++++
- 3 files changed, 824 insertions(+)
+ arch/arm/dts/rk3568-dshanpi-r1-u-boot.dtsi    |  35 ++
+ configs/dshanpi-r1-rk3568_defconfig           |  80 +++
+ .../src/arm64/rockchip/rk3568-dshanpi-r1.dts  | 692 ++++++++++++++++++
+ 3 files changed, 807 insertions(+)
  create mode 100644 arch/arm/dts/rk3568-dshanpi-r1-u-boot.dtsi
  create mode 100644 configs/dshanpi-r1-rk3568_defconfig
  create mode 100644 dts/upstream/src/arm64/rockchip/rk3568-dshanpi-r1.dts
@@ -17,7 +17,7 @@ new file mode 100644
 index 00000000..869724ec
 --- /dev/null
 +++ b/arch/arm/dts/rk3568-dshanpi-r1-u-boot.dtsi
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,35 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +/*
 + * (C) Copyright 2021 Rockchip Electronics Co., Ltd
@@ -44,13 +44,6 @@ index 00000000..869724ec
 +	mmc-hs400-enhanced-strobe;
 +};
 +
-+&sfc {
-+	flash@0 {
-+		bootph-pre-ram;
-+		bootph-some-ram;
-+	};
-+};
-+
 +&usb_host0_ohci {
 +	status = "disabled";
 +};
@@ -65,21 +58,16 @@ new file mode 100644
 index 00000000..becb4240
 --- /dev/null
 +++ b/configs/dshanpi-r1-rk3568_defconfig
-@@ -0,0 +1,93 @@
+@@ -0,0 +1,80 @@
 +CONFIG_ARM=y
 +CONFIG_SKIP_LOWLEVEL_INIT=y
 +CONFIG_COUNTER_FREQUENCY=24000000
 +CONFIG_ARCH_ROCKCHIP=y
-+CONFIG_SF_DEFAULT_SPEED=24000000
-+CONFIG_SF_DEFAULT_MODE=0x2000
 +CONFIG_DEFAULT_DEVICE_TREE="rockchip/rk3568-dshanpi-r1"
 +CONFIG_ROCKCHIP_RK3568=y
-+CONFIG_ROCKCHIP_SPI_IMAGE=y
 +CONFIG_SPL_SERIAL=y
 +CONFIG_DEBUG_UART_BASE=0xFE660000
 +CONFIG_DEBUG_UART_CLOCK=24000000
-+CONFIG_SPL_SPI_FLASH_SUPPORT=y
-+CONFIG_SPL_SPI=y
 +CONFIG_SYS_LOAD_ADDR=0xc00800
 +CONFIG_PCI=y
 +CONFIG_DEBUG_UART=y
@@ -93,10 +81,7 @@ index 00000000..becb4240
 +# CONFIG_DISPLAY_CPUINFO is not set
 +CONFIG_DISPLAY_BOARDINFO_LATE=y
 +CONFIG_SPL_MAX_SIZE=0x40000
-+CONFIG_SPL_PAD_TO=0x7f8000
 +# CONFIG_SPL_RAW_IMAGE_SUPPORT is not set
-+CONFIG_SPL_SPI_LOAD=y
-+CONFIG_SYS_SPI_U_BOOT_OFFS=0x60000
 +CONFIG_SPL_ATF=y
 +CONFIG_CMD_GPIO=y
 +CONFIG_CMD_GPT=y
@@ -127,10 +112,6 @@ index 00000000..becb4240
 +CONFIG_MMC_SDHCI=y
 +CONFIG_MMC_SDHCI_SDMA=y
 +CONFIG_MMC_SDHCI_ROCKCHIP=y
-+CONFIG_SF_DEFAULT_BUS=4
-+CONFIG_SPI_FLASH_SFDP_SUPPORT=y
-+CONFIG_SPI_FLASH_MACRONIX=y
-+CONFIG_SPI_FLASH_XTX=y
 +CONFIG_PHY_REALTEK=y
 +CONFIG_DWC_ETH_QOS=y
 +CONFIG_DWC_ETH_QOS_ROCKCHIP=y
@@ -148,7 +129,6 @@ index 00000000..becb4240
 +CONFIG_BAUDRATE=1500000
 +CONFIG_DEBUG_UART_SHIFT=2
 +CONFIG_SYS_NS16550_MEM32=y
-+CONFIG_ROCKCHIP_SFC=y
 +CONFIG_SYSRESET=y
 +CONFIG_USB=y
 +CONFIG_USB_XHCI_HCD=y
@@ -164,7 +144,7 @@ new file mode 100644
 index 00000000..19f8fc36
 --- /dev/null
 +++ b/dts/upstream/src/arm64/rockchip/rk3568-dshanpi-r1.dts
-@@ -0,0 +1,689 @@
+@@ -0,0 +1,692 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
@@ -179,8 +159,8 @@ index 00000000..19f8fc36
 +#include "rk3568.dtsi"
 +
 +/ {
-+	model = "Rockchip RK3568 EVB1 DDR4 V10 Board";
-+	compatible = "rockchip,rk3568-evb1-v10", "rockchip,rk3568";
++	model = "100ASK DshanPi R1 / R1+";
++	compatible = "100ask,dshanpi-r1", "rockchip,rk3568";
 +
 +	aliases {
 +		ethernet0 = &gmac0;
@@ -217,7 +197,7 @@ index 00000000..19f8fc36
 +		compatible = "gpio-leds";
 +
 +		led_work: led-0 {
-+			gpios = <&gpio0 RK_PC0 GPIO_ACTIVE_HIGH>;
++			gpios = <&gpio0 RK_PD6 GPIO_ACTIVE_LOW>;
 +			function = LED_FUNCTION_HEARTBEAT;
 +			color = <LED_COLOR_ID_BLUE>;
 +			linux,default-trigger = "heartbeat";
@@ -258,6 +238,16 @@ index 00000000..19f8fc36
 +		regulator-min-microvolt = <5000000>;
 +		regulator-max-microvolt = <5000000>;
 +		vin-supply = <&dc_12v>;
++	};
++
++	vdd_cpu: vdd-cpu {
++		compatible = "regulator-fixed";
++		regulator-name = "vdd_cpu";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <900000>;
++		regulator-max-microvolt = <900000>;
++		vin-supply = <&vcc5v0_sys>;
 +	};
 +
 +	vcc5v0_usb: vcc5v0-usb {
@@ -352,34 +342,42 @@ index 00000000..19f8fc36
 +};
 +
 +&gmac0 {
-+	assigned-clocks = <&cru SCLK_GMAC0_RX_TX>, <&cru SCLK_GMAC0>;
-+	assigned-clock-parents = <&cru SCLK_GMAC0_RGMII_SPEED>;
-+	assigned-clock-rates = <0>, <125000000>;
-+	clock_in_out = "output";
++	assigned-clocks = <&cru SCLK_GMAC0_RX_TX>, <&cru SCLK_GMAC0>, <&cru CLK_MAC0_OUT>;
++	assigned-clock-parents = <&cru SCLK_GMAC0_RGMII_SPEED>, <&cru CLK_MAC0_2TOP>;
++	assigned-clock-rates = <0>, <125000000>, <25000000>;
++	clock_in_out = "input";
 +	phy-handle = <&rgmii_phy0>;
-+	phy-mode = "rgmii-id";
++	phy-mode = "rgmii";
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&gmac0_miim
 +		     &gmac0_tx_bus2
 +		     &gmac0_rx_bus2
 +		     &gmac0_rgmii_clk
-+		     &gmac0_rgmii_bus>;
++		     &gmac0_rgmii_bus
++		     &eth0_pins
++		     &gmac0_clkinout>;
++	tx_delay = <0x2d>;
++	rx_delay = <0x2c>;
 +	status = "okay";
 +};
 +
 +&gmac1 {
-+	assigned-clocks = <&cru SCLK_GMAC1_RX_TX>, <&cru SCLK_GMAC1>;
-+	assigned-clock-parents = <&cru SCLK_GMAC1_RGMII_SPEED>;
-+	assigned-clock-rates = <0>, <125000000>;
-+	clock_in_out = "output";
++	assigned-clocks = <&cru SCLK_GMAC1_RX_TX>, <&cru SCLK_GMAC1>, <&cru CLK_MAC1_OUT>;
++	assigned-clock-parents = <&cru SCLK_GMAC1_RGMII_SPEED>, <&cru CLK_MAC1_2TOP>;
++	assigned-clock-rates = <0>, <125000000>, <25000000>;
++	clock_in_out = "input";
 +	phy-handle = <&rgmii_phy1>;
-+	phy-mode = "rgmii-id";
++	phy-mode = "rgmii";
 +	pinctrl-names = "default";
 +	pinctrl-0 = <&gmac1m1_miim
 +		     &gmac1m1_tx_bus2
 +		     &gmac1m1_rx_bus2
 +		     &gmac1m1_rgmii_clk
-+		     &gmac1m1_rgmii_bus>;
++		     &gmac1m1_rgmii_bus
++		     &eth1m0_pins
++		     &gmac1m1_clkinout>;
++	tx_delay = <0x3a>;
++	rx_delay = <0x29>;
 +	status = "okay";
 +};
 +
@@ -412,23 +410,6 @@ index 00000000..19f8fc36
 +
 +&i2c0 {
 +	status = "okay";
-+
-+	vdd_cpu: regulator@1c {
-+		compatible = "tcs,tcs4525";
-+		reg = <0x1c>;
-+		fcs,suspend-voltage-selector = <1>;
-+		regulator-name = "vdd_cpu";
-+		regulator-always-on;
-+		regulator-boot-on;
-+		regulator-min-microvolt = <800000>;
-+		regulator-max-microvolt = <1150000>;
-+		regulator-ramp-delay = <2300>;
-+		vin-supply = <&vcc5v0_sys>;
-+
-+		regulator-state-mem {
-+			regulator-off-in-suspend;
-+		};
-+	};
 +
 +	rk809: pmic@20 {
 +		compatible = "rockchip,rk809";
@@ -677,6 +658,7 @@ index 00000000..19f8fc36
 +	rgmii_phy0: ethernet-phy@0 {
 +		compatible = "ethernet-phy-ieee802.3-c22";
 +		reg = <0x0>;
++		clocks = <&cru CLK_MAC0_OUT>;
 +		reset-assert-us = <20000>;
 +		reset-deassert-us = <100000>;
 +		reset-gpios = <&gpio2 RK_PD3 GPIO_ACTIVE_LOW>;
@@ -687,9 +669,10 @@ index 00000000..19f8fc36
 +	rgmii_phy1: ethernet-phy@0 {
 +		compatible = "ethernet-phy-ieee802.3-c22";
 +		reg = <0x0>;
++		clocks = <&cru CLK_MAC1_OUT>;
 +		reset-assert-us = <20000>;
 +		reset-deassert-us = <100000>;
-+		reset-gpios = <&gpio2 RK_PD1 GPIO_ACTIVE_LOW>;
++		reset-gpios = <&gpio0 RK_PC1 GPIO_ACTIVE_LOW>;
 +	};
 +};
 +
@@ -705,7 +688,7 @@ index 00000000..19f8fc36
 +
 +	leds {
 +		led_work_en: led_work_en {
-+			rockchip,pins = <0 RK_PC0 RK_FUNC_GPIO &pcfg_pull_none>;
++			rockchip,pins = <0 RK_PD6 RK_FUNC_GPIO &pcfg_pull_none>;
 +		};
 +	};
 +
