@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Disable both PCIe root complexes: the mainline host keeps its PHY
+ * powered waiting for a link-up IRQ, so with no card present the board
+ * burns ~0.6 W extra at idle (measured on an R1+). M.2 PCIe devices
+ * (NVMe, PCIe WiFi) cannot be used while applied.
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	metadata {
+		title = "Disable PCIe to save idle power (DshanPi R1/R1+)";
+		compatible = "100ask,dshanpi-r1", "rockchip,rk3568";
+		category = "misc";
+		description = "Disable the pcie2x1/pcie3x2 root complexes so their PHYs power off. M.2 PCIe devices (NVMe, PCIe WiFi) will not work while applied.";
+	};
+
+	fragment@0 {
+		target = <&pcie2x1>;
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+
+	fragment@1 {
+		target = <&pcie3x2>;
+		__overlay__ {
+			status = "disabled";
+		};
+	};
+};

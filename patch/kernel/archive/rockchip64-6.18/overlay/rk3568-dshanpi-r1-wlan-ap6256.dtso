@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Enable the WiFi/BT combo on SDMMC2 + UART8: the onboard AP6256 (R1)
+ * or an M.2 E-key AP62xx module (R1+).
+ */
+
+/dts-v1/;
+/plugin/;
+
+/ {
+	metadata {
+		title = "Enable the WiFi/BT combo (DshanPi R1/R1+)";
+		compatible = "100ask,dshanpi-r1", "rockchip,rk3568";
+		category = "misc";
+		description = "Enable SDMMC2 SDIO WiFi and the UART8 bluetooth serdev child for the onboard AP6256 (R1) or an M.2 E-key AP62xx module (R1+).";
+	};
+
+	fragment@0 {
+		target = <&sdmmc2>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+
+	fragment@1 {
+		target = <&uart8>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+};

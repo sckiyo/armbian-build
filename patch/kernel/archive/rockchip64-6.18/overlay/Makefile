@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
 dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
 	hinlink-h88k-240x135-lcd.dtbo \
+	rk3568-dshanpi-r1-wlan-ap6256.dtbo \
+	rk3568-dshanpi-r1-disable-pcie.dtbo \
 	rk35xx-radxa-zero-3w-ext-ant.dtbo \
 	rk3308-uart1.dtbo rk3308-uart2.dtbo rk3308-uart3.dtbo \
 	rk3308-otg-host.dtbo \

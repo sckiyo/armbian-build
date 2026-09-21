@@ -398,6 +398,22 @@ Sets LED default triggers for NanoPi R5C/R5S.
 **rockchip-rk3568-rock-3a-disable-uart2:**
 Disables UART2 (debug UART) on ROCK 3A.
 
+**rk3568-dshanpi-r1-wlan-ap6256:**
+DshanPi R1 / R1+ SDIO/UART WiFi/BT combo (SDMMC2 WiFi + UART8 BT): the
+onboard AP6256 (R1) or an M.2 E-key AP62xx module (R1+). Base DT leaves
+those nodes disabled so an empty slot or a PCIe card does not bind
+hci_bcm. Enable in armbianEnv.txt (overlay_prefix=rk3568-dshanpi-r1):
+overlays=wlan-ap6256
+PCIe WiFi/NVMe in the R1+ slot needs no overlay.
+
+**rk3568-dshanpi-r1-disable-pcie:**
+DshanPi R1 / R1+: disable both PCIe root complexes. Mainline keeps their
+PHYs powered while waiting for a link-up IRQ, so with no card present the
+board burns ~0.6 W extra at idle; with this overlay the controllers never
+probe. M.2 PCIe devices (NVMe, PCIe WiFi) cannot be used while it is
+applied. Enable in armbianEnv.txt (overlay_prefix=rk3568-dshanpi-r1):
+overlays=disable-pcie
+
 ### RK3308 overlays
 
 **rk3308-b@1.3ghz:**
