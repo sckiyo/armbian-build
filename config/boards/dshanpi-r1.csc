@@ -55,8 +55,9 @@ function post_family_tweaks__dshanpi-r1_serial_console_last() {
 }
 
 function pre_config_uboot_target__dshanpi-r1_boot_sd_first() {
-	# Scan SD before eMMC so an inserted card overrides an eMMC install; no
-	# "spi" target - the board carries no SPI-NOR flash.
+	# mmc0 is the TF slot and mmc1 is eMMC. rk356x-u-boot.dtsi swaps those
+	# aliases; the board u-boot dtsi puts them back. No "spi" target - the
+	# board carries no SPI-NOR flash.
 	declare -a rockchip_uboot_targets=("mmc0" "mmc1" "nvme" "scsi" "usb" "pxe" "dhcp")
 	display_alert "u-boot for ${BOARD}/${BRANCH}" "u-boot: adjust boot order to '${rockchip_uboot_targets[*]}'" "info"
 	if ! grep -q '^[[:space:]]*#define BOOT_TARGETS' include/configs/rockchip-common.h; then

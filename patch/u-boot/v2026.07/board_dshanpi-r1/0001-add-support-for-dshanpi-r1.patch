@@ -3,11 +3,17 @@ From: chainsx <chainsx@outlook.com>
 Date: Sun, 22 Dec 2024 16:27:57 +0800
 Subject: [PATCH] board: rockchip: add 100ASK DshanPi R1 / R1+ support
 
+note: sckiyo: aliases and spl-boot-order added so an inserted SD card
+overrides eMMC from SPL onward (upstream rk356x-u-boot.dtsi favours
+eMMC).
+
+Signed-off-by: sckiyo <sckiyo@outlook.com>
+
 ---
- arch/arm/dts/rk3568-dshanpi-r1-u-boot.dtsi    |  35 ++
+ arch/arm/dts/rk3568-dshanpi-r1-u-boot.dtsi    |  49 ++
  configs/dshanpi-r1-rk3568_defconfig           |  80 +++
  .../src/arm64/rockchip/rk3568-dshanpi-r1.dts  | 692 ++++++++++++++++++
- 3 files changed, 807 insertions(+)
+ 3 files changed, 821 insertions(+)
  create mode 100644 arch/arm/dts/rk3568-dshanpi-r1-u-boot.dtsi
  create mode 100644 configs/dshanpi-r1-rk3568_defconfig
  create mode 100644 dts/upstream/src/arm64/rockchip/rk3568-dshanpi-r1.dts
@@ -17,13 +23,27 @@ new file mode 100644
 index 00000000..869724ec
 --- /dev/null
 +++ b/arch/arm/dts/rk3568-dshanpi-r1-u-boot.dtsi
-@@ -0,0 +1,35 @@
+@@ -0,0 +1,49 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +/*
 + * (C) Copyright 2021 Rockchip Electronics Co., Ltd
 + */
 +
 +#include "rk356x-u-boot.dtsi"
++
++/ {
++	aliases {
++		/* rk356x-u-boot.dtsi maps mmc0 to eMMC (&sdhci). Keep the TF slot as mmc0. */
++		mmc0 = &sdmmc0;
++		mmc1 = &sdhci;
++	};
++
++	chosen {
++		/* Upstream "same-as-spl" keeps U-Boot proper on eMMC (BROM
++		 * probes eMMC before TF); pin the TF slot first. */
++		u-boot,spl-boot-order = &sdmmc0, &sdhci;
++	};
++};
 +
 +&pcie3x2 {
 +	pinctrl-0 = <&pcie3x2_reset_h>;
