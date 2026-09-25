@@ -27,6 +27,57 @@
 	model = "100ASK DshanPi R1 / R1+";
 	compatible = "100ask,dshanpi-r1", "rockchip,rk3568";
 
+	/*
+	 * Side buttons: SPST to ground, one SARADC channel each, no resistor
+	 * ladder. REC is wired on both R1 and R1+; KEY1/KEY2 are populated
+	 * only on the R1+ and appear in no schematic. Measured on an R1+ at
+	 * the 1.8 V reference: pressed pulls a channel to ~25 mV, released
+	 * sits at ~1.6 V, floating channels read ~1.3 V. The adc-keys driver
+	 * reports the rung nearest the reading, so with the 50 mV press
+	 * threshold a floating channel reads as released.
+	 */
+	adc-keys {
+		compatible = "adc-keys";
+		io-channels = <&saradc 0>;
+		io-channel-names = "buttons";
+		keyup-threshold-microvolt = <1800000>;
+		poll-interval = <100>;
+
+		button-rec {
+			label = "REC";
+			linux,code = <KEY_VENDOR>;
+			press-threshold-microvolt = <50000>;
+		};
+	};
+
+	adc-keys-1 {
+		compatible = "adc-keys";
+		io-channels = <&saradc 1>;
+		io-channel-names = "buttons";
+		keyup-threshold-microvolt = <1800000>;
+		poll-interval = <100>;
+
+		button-key1 {
+			label = "KEY1";
+			linux,code = <KEY_PROG1>;
+			press-threshold-microvolt = <50000>;
+		};
+	};
+
+	adc-keys-2 {
+		compatible = "adc-keys";
+		io-channels = <&saradc 2>;
+		io-channel-names = "buttons";
+		keyup-threshold-microvolt = <1800000>;
+		poll-interval = <100>;
+
+		button-key2 {
+			label = "KEY2";
+			linux,code = <KEY_PROG2>;
+			press-threshold-microvolt = <50000>;
+		};
+	};
+
 	audiopwmout_diff: audiopwmout-diff {
 		status = "disabled";
 		compatible = "simple-audio-card";

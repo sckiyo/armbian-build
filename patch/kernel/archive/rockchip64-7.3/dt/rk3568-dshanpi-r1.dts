@@ -2,8 +2,7 @@
 /*
  * 100ASK DshanPi R1 / R1+ (RK3568), ported from the vendor BSP device tree.
  *
- * Not modeled: FUSB302 PD (OTG port is host-only), adc-keys (RECOVERY
- * shorts SARADC_VIN0 to GND with no pull-up ladder), pwm15 IR (vendor
+ * Not modeled: FUSB302 PD (OTG port is host-only), pwm15 IR (vendor
  * remotectl; receiver on GPIO3_C5, m1 pin is CAN1_TX here), pwm4/5 DSI
  * backlights (no panel in the BSP DT), SFC (no SPI-NOR), NPU (no mainline
  * rknpu; vdd_npu therefore not always-on). vdd_cpu is a fixed ~0.9 V rail
@@ -17,6 +16,7 @@
 /dts-v1/;
 
 #include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/linux-event-codes.h>
 #include <dt-bindings/leds/common.h>
 #include <dt-bindings/pinctrl/rockchip.h>
 #include <dt-bindings/soc/rockchip,vop2.h>
@@ -25,6 +25,57 @@
 / {
 	model = "100ASK DshanPi R1 / R1+";
 	compatible = "100ask,dshanpi-r1", "rockchip,rk3568";
+
+	/*
+	 * Side buttons: SPST to ground, one SARADC channel each, no resistor
+	 * ladder. REC is wired on both R1 and R1+; KEY1/KEY2 are populated
+	 * only on the R1+ and appear in no schematic. Measured on an R1+ at
+	 * the 1.8 V reference: pressed pulls a channel to ~25 mV, released
+	 * sits at ~1.6 V, floating channels read ~1.3 V. The adc-keys driver
+	 * reports the rung nearest the reading, so with the 50 mV press
+	 * threshold a floating channel reads as released.
+	 */
+	adc-keys {
+		compatible = "adc-keys";
+		io-channels = <&saradc 0>;
+		io-channel-names = "buttons";
+		keyup-threshold-microvolt = <1800000>;
+		poll-interval = <100>;
+
+		button-rec {
+			label = "REC";
+			linux,code = <KEY_VENDOR>;
+			press-threshold-microvolt = <50000>;
+		};
+	};
+
+	adc-keys-1 {
+		compatible = "adc-keys";
+		io-channels = <&saradc 1>;
+		io-channel-names = "buttons";
+		keyup-threshold-microvolt = <1800000>;
+		poll-interval = <100>;
+
+		button-key1 {
+			label = "KEY1";
+			linux,code = <KEY_PROG1>;
+			press-threshold-microvolt = <50000>;
+		};
+	};
+
+	adc-keys-2 {
+		compatible = "adc-keys";
+		io-channels = <&saradc 2>;
+		io-channel-names = "buttons";
+		keyup-threshold-microvolt = <1800000>;
+		poll-interval = <100>;
+
+		button-key2 {
+			label = "KEY2";
+			linux,code = <KEY_PROG2>;
+			press-threshold-microvolt = <50000>;
+		};
+	};
 
 	aliases {
 		ethernet0 = &gmac0;
