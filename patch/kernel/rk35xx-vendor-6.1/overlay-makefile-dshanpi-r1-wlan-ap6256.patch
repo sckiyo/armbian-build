@@ -9,25 +9,24 @@ overlays from %.dts, not %.dtso. Do not ship an overlay/Makefile in
 the patch directory: copy_bare_files would overwrite the vendor tree's
 shared overlay Makefile (~350 entries used by every rk35xx board).
 
+A second dtbo- += assignment is inserted in front of dtbotxt-, instead
+of extending the last entry of the existing list. Upstream appending
+another overlay does not change the dtbotxt block, so the patch still
+applies.
+
 Signed-off-by: sckiyo <sckiyo@outlook.com>
 ---
- arch/arm64/boot/dts/rockchip/overlay/Makefile | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ arch/arm64/boot/dts/rockchip/overlay/Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/rockchip/overlay/Makefile b/arch/arm64/boot/dts/rockchip/overlay/Makefile
 index 111111111111..222222222222 100644
 --- a/arch/arm64/boot/dts/rockchip/overlay/Makefile
 +++ b/arch/arm64/boot/dts/rockchip/overlay/Makefile
-@@ -347,7 +347,8 @@ dtbo-$(CONFIG_ARCH_ROCKCHIP) += \
- 	recomputer-rk3588-devkit-cam1-rpi-v2.dtbo \
- 	recomputer-rk3588-devkit-cam1-rpi-v3.dtbo \
- 	recomputer-rk3588-devkit-halow-wifi.dtbo \
--	recomputer-rk3588-devkit-raspi-7inch-touchscreen.dtbo
-+	recomputer-rk3588-devkit-raspi-7inch-touchscreen.dtbo \
-+	rk3568-dshanpi-r1-wlan-ap6256.dtbo
-
+@@ -356,2 +356,4 @@
++dtbo-$(CONFIG_ARCH_ROCKCHIP) += rk3568-dshanpi-r1-wlan-ap6256.dtbo
++
  dtbotxt-$(CONFIG_ARCH_ROCKCHIP) += \
  	README.rockchip-overlays
 --
 2.39.5
-
