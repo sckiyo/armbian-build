@@ -11,9 +11,9 @@ Signed-off-by: sckiyo <sckiyo@outlook.com>
 
 ---
  arch/arm/dts/rk3568-dshanpi-r1-u-boot.dtsi    |  49 ++
- configs/dshanpi-r1-rk3568_defconfig           |  80 +++
+ configs/dshanpi-r1-rk3568_defconfig           |  82 +++
  .../src/arm64/rockchip/rk3568-dshanpi-r1.dts  | 692 ++++++++++++++++++
- 3 files changed, 821 insertions(+)
+ 3 files changed, 823 insertions(+)
  create mode 100644 arch/arm/dts/rk3568-dshanpi-r1-u-boot.dtsi
  create mode 100644 configs/dshanpi-r1-rk3568_defconfig
  create mode 100644 dts/upstream/src/arm64/rockchip/rk3568-dshanpi-r1.dts
@@ -75,10 +75,10 @@ index 00000000..869724ec
 +};
 diff --git a/configs/dshanpi-r1-rk3568_defconfig b/configs/dshanpi-r1-rk3568_defconfig
 new file mode 100644
-index 00000000..becb4240
+index 00000000..ed5dca2a
 --- /dev/null
 +++ b/configs/dshanpi-r1-rk3568_defconfig
-@@ -0,0 +1,80 @@
+@@ -0,0 +1,82 @@
 +CONFIG_ARM=y
 +CONFIG_SKIP_LOWLEVEL_INIT=y
 +CONFIG_COUNTER_FREQUENCY=24000000
@@ -91,6 +91,8 @@ index 00000000..becb4240
 +CONFIG_SYS_LOAD_ADDR=0xc00800
 +CONFIG_PCI=y
 +CONFIG_DEBUG_UART=y
++CONFIG_ADC=y
++CONFIG_SARADC_ROCKCHIP=y
 +CONFIG_AHCI=y
 +CONFIG_FIT=y
 +CONFIG_FIT_VERBOSE=y
